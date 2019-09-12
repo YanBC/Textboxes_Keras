@@ -152,6 +152,7 @@ epochs: 200
 # val_set: ./datasets/textboxes_original_val.txt
 weights_dir: ./logs/original_test/weights
 csv_path: ./logs/original_test/train.csv
+tbDir: ./logs/original_test/tblog/
 
 
 ##############

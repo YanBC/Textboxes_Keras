@@ -186,3 +186,39 @@ class TextBoxes_Loss:
         total_loss = total_loss * tf.to_float(batch_size)
 
         return total_loss
+
+
+
+
+
+
+
+# test
+if __name__ == '__main__':
+    import numpy as np
+
+    loss_f = TextBoxes_Loss(neg_pos_ratio=3, alpha=1.0, n_neg_min=10)
+    y_true = np.random.rand(32, 23280, 6)
+    y_true[:,:,0] = np.random.choice([0,1], 23280*32).reshape((32, 23280))
+    y_true[:,:,1] = 1 - y_true[:,:,0]
+    y_pred = y_true
+
+    gt = tf.constant(y_true, dtype=tf.float32)
+    pred = tf.constant(y_pred, dtype=tf.float32)
+
+    loss = loss_f.compute_loss(gt, pred)
+
+    sess = tf.Session()
+
+    tmp = sess.run(loss) / 32
+
+    a = 3
+
+
+
+
+
+
+
+
+

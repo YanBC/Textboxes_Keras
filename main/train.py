@@ -6,7 +6,7 @@ import yaml
 import argparse
 import cv2 as cv
 from keras.optimizers import Adam, SGD
-from keras.callbacks import ModelCheckpoint, LearningRateScheduler, TerminateOnNaN, CSVLogger
+from keras.callbacks import ModelCheckpoint, LearningRateScheduler, TerminateOnNaN, CSVLogger, TensorBoard
 from keras import backend as K
 from keras.models import load_model
 
@@ -19,12 +19,12 @@ from utils.data_master import Data_Master as data_gen
 
 
 def lr_schedule(epoch):
-    if epoch < 80:
-        return 0.0001
-    elif epoch < 100:
-        return 0.0001
-    else:
+    if epoch < 30:
         return 0.00001
+    elif epoch < 100:
+        return 0.000001
+    else:
+        return 0.000001
 
 
 if __name__ == '__main__':
@@ -43,6 +43,7 @@ if __name__ == '__main__':
     weightsDir = config['weights_dir']
     csvPath = config['csv_path']
     n_times = config['epochs']
+    tbDir = config['tbDir']
 
 
     # build model
@@ -73,10 +74,12 @@ if __name__ == '__main__':
                            append=True)
     learning_rate_scheduler = LearningRateScheduler(schedule=lr_schedule, verbose=1)
     terminate_on_nan = TerminateOnNaN()
+    tb_log = TensorBoard(log_dir=tbDir, write_graph=True, write_grads=True)
     callbacks = [model_checkpoint,
                  csv_logger,
                  learning_rate_scheduler,
-                 terminate_on_nan]
+                 terminate_on_nan,
+                 tb_log]
 
 
     # start training
