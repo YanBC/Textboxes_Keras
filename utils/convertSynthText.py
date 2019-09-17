@@ -60,12 +60,14 @@ def create_one(index):
     with open(os.path.join(targetAnnoDir, '{}.txt'.format(index)), 'w') as f:
         f.write(string_anno)
 
+    return True
+
 
 
 def transform_dataset():
     indices = [x for x in range(n_data)]
     with fthreading.Pool(processes=num_of_workers) as p:
-        p.map(create_one, indices)
+        ret = p.map(create_one, indices)
     print('Sucessfully transformed %d samples' % sum(ret))
 
 
