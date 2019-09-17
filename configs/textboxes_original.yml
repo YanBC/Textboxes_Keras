@@ -148,7 +148,9 @@ backbone: ./pretrain_weights/VGG_ILSVRC_16_layers_fc_reduced.h5
 loss_neg_pos_ratio: 3
 loss_alpha: 1.0
 batch_size: 64
-epochs: 200
+epochs: 5
+phase1: 2
+phase2: 4
 data_dir: ./logs/textboxes_original/data
 weights_dir: ./logs/textboxes_original/weights
 csv_path: ./logs/textboxes_original/train.csv

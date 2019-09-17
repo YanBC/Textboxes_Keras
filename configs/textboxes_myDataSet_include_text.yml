@@ -148,6 +148,8 @@ loss_neg_pos_ratio: 3
 loss_alpha: 1.0
 batch_size: 64
 epochs: 200
+phase1: 40
+phase2: 100
 data_dir: ./logs/textboxes_myDataSet_include_text/data
 weights_dir: ./logs/textboxes_myDataSet_include_text/weights
 csv_path: ./logs/textboxes_myDataSet_include_text/train.csv

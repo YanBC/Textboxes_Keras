@@ -19,15 +19,6 @@ from utils.data_master import Data_Master as data_gen
 
 
 
-def lr_schedule(epoch):
-    if epoch < 40:
-        return 0.001
-    elif epoch < 100:
-        return 0.0001
-    else:
-        return 0.00001
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('config', help='path to configuration file')
@@ -47,7 +38,16 @@ if __name__ == '__main__':
     dataDir = config['data_dir']
     trainset = os.path.join(dataDir, 'train.txt')
     valset = os.path.join(dataDir, 'val.txt')
+    phase1 = config['phase1']
+    phase2 = config['phase2']
 
+    def lr_schedule(epoch):
+        if epoch < phase1:
+            return 0.001
+        elif epoch < phase2:
+            return 0.0001
+        else:
+            return 0.00001
 
     # build model
     model = TextBoxes(config)
