@@ -5,8 +5,6 @@ import shutil
 import multiprocessing.dummy as fthreading
 
 
-
-
 ########## User Config ##############
 SynthDir = '/workspace/yanbc/SynthText'
 targetDir = '/workspace/yanbc/time_stamp_ocr/SynthText_transformed'
@@ -37,18 +35,27 @@ def create_one(index):
     shutil.copy(os.path.join(SynthDir, imagePath), os.path.join(targetImageDir, '{}.jpg'.format(index)))
 
     anno = annos[index]
-    n_boxes = anno.shape[2]
     string_anno = ''
-    for i in range(n_boxes):
-        box_anno = anno[:,:,i]
-        x_anno = box_anno[0,:]
-        y_anno = box_anno[1,:]
-
+    if anno.shape == (2,4):
+        x_anno = anno[0,:]
+        y_anno = anno[1,:]
         left = str(int(np.min(x_anno)))
         right = str(int(np.max(x_anno)))
         top = str(int(np.min(y_anno)))
         bottom = str(int(np.max(y_anno)))
-        string_anno += left + ', ' + top + ', ' + right + ', ' + top + ', ' + right + ', ' + bottom + ', ' + left + ', ' + bottom + '\n'
+        string_anno += left + ', ' + top + ', ' + right + ', ' + top + ', ' + right + ', ' + bottom + ', ' + left + ', ' + bottom + '\n'      
+    else:
+        n_boxes = anno.shape[2]
+        for i in range(n_boxes):
+            box_anno = anno[:,:,i]
+            x_anno = box_anno[0,:]
+            y_anno = box_anno[1,:]
+
+            left = str(int(np.min(x_anno)))
+            right = str(int(np.max(x_anno)))
+            top = str(int(np.min(y_anno)))
+            bottom = str(int(np.max(y_anno)))
+            string_anno += left + ', ' + top + ', ' + right + ', ' + top + ', ' + right + ', ' + bottom + ', ' + left + ', ' + bottom + '\n'
 
     with open(os.path.join(targetAnnoDir, '{}.txt'.format(index)), 'w') as f:
         f.write(string_anno)
@@ -58,11 +65,10 @@ def create_one(index):
 def transform_dataset():
     indices = [x for x in range(n_data)]
     with fthreading.Pool(processes=num_of_workers) as p:
-        ret = p.map(create_one, indices)
+        p.map(create_one, indices)
     print('Sucessfully transformed %d samples' % sum(ret))
 
 
 if __name__ == '__main__':
-    # create_one(3)
-    # create_one(6732)
+    # create_one(85350)
     transform_dataset()
