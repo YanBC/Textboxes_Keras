@@ -62,7 +62,7 @@ class Data_Butler():
         return np.concatenate(boxes_per_layer)
 
 
-    def _image_preprocessing(self, image):
+    def image_preprocessing(self, image):
         img = cv.resize(image, (self.img_w, self.img_h))
         img -= np.array(self.image_mean, dtype=np.uint8)
         # img /= 255
@@ -180,7 +180,7 @@ class Data_Butler():
             y_true[:, 0] = 1
         
         # x (the processed image)
-        img = self._image_preprocessing(image)
+        img = self.image_preprocessing(image)
 
         return img, y_true
 
@@ -206,6 +206,7 @@ class Data_Butler():
         anchor_boxes = self._anchor_boxes()
         text_boxes = []
         # confidence, centre_x, centre_y, width, height
+
         for text_index in text_indices:
             delta_x, delta_y, delta_w, delta_h = y_pred[text_index, 2:]
             x0, y0, w0, h0 = anchor_boxes[text_index, :]
@@ -216,18 +217,19 @@ class Data_Butler():
             w = w0 * np.exp(delta_w)
             h = h0 * np.exp(delta_h)
             text_boxes.append(np.array([conf, x, y, w, h]))
+                
+        if len(text_boxes) > 0:
+            text_boxes = np.stack(text_boxes)
+            text_boxes = self._nms(text_boxes, iou_thres)
 
-        text_boxes = np.stack(text_boxes)
-        text_boxes = self._nms(text_boxes, iou_thres)
+            if len(text_boxes) > top_k:
+                text_boxes = text_boxes[:top_k, :]
 
-        if len(text_boxes) > top_k:
-            text_boxes = text_boxes[:top_k, :]
-
-        if image_width and image_height:
-            text_boxes[:, 1] = np.floor(text_boxes[:, 1] * image_width)
-            text_boxes[:, 2] = np.floor(text_boxes[:, 2] * image_height)
-            text_boxes[:, 3] = np.floor(text_boxes[:, 3] * image_width)
-            text_boxes[:, 4] = np.floor(text_boxes[:, 4] * image_height)
+            if image_width and image_height:
+                text_boxes[:, 1] = np.floor(text_boxes[:, 1] * image_width)
+                text_boxes[:, 2] = np.floor(text_boxes[:, 2] * image_height)
+                text_boxes[:, 3] = np.floor(text_boxes[:, 3] * image_width)
+                text_boxes[:, 4] = np.floor(text_boxes[:, 4] * image_height)
 
         return text_boxes
 

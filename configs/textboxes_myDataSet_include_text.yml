@@ -1,5 +1,4 @@
-# textboxes_original.yml
-# see https://arxiv.org/pdf/1611.06779.pdf
+# textboxes_myDataSet_include_text.yml
 
 ############
 #  Common
@@ -143,16 +142,22 @@ swap_channels:
 ##############
 #   Train
 ##############
+n_gpus: 2
 backbone: ./pretrain_weights/VGG_ILSVRC_16_layers_fc_reduced.h5
 loss_neg_pos_ratio: 3
 loss_alpha: 1.0
-batch_size: 32
-epochs: 10
-# train_set: ./datasets/textboxes_original_train.txt
-# val_set: ./datasets/textboxes_original_val.txt
-weights_dir: ./logs/original/weights
-csv_path: ./logs/original/train.csv
-tbDir: ./logs/original/tblog/
+batch_size: 64
+epochs: 200
+data_dir: ./logs/textboxes_myDataSet_include_text/data
+weights_dir: ./logs/textboxes_myDataSet_include_text/weights
+csv_path: ./logs/textboxes_myDataSet_include_text/train.csv
+tbDir: ./logs/textboxes_myDataSet_include_text/tblog/
+
+
+##############
+#  Predict
+##############
+best_model: ./logs/textboxes_myDataSet_include_text/weights/weights_best.h5
 
 
 ##############
