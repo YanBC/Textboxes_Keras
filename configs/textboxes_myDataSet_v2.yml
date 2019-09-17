@@ -1,4 +1,4 @@
-# textboxes_myDataSet.yml
+# textboxes_myDataSet_v2.yml
 
 ############
 #  Common
@@ -148,16 +148,16 @@ loss_neg_pos_ratio: 3
 loss_alpha: 1.0
 batch_size: 64
 epochs: 200
-data_dir: ./logs/textboxes_myDataSet/data
-weights_dir: ./logs/textboxes_myDataSet/weights
-csv_path: ./logs/textboxes_myDataSet/train.csv
-tbDir: ./logs/textboxes_myDataSet/tblog/
+data_dir: ./logs/textboxes_myDataSet_v2/data
+weights_dir: ./logs/textboxes_myDataSet_v2/weights
+csv_path: ./logs/textboxes_myDataSet_v2/train.csv
+tbDir: ./logs/textboxes_myDataSet_v2/tblog/
 
 
 ##############
 #  Predict
 ##############
-best_model: ./logs/textboxes_myDataSet/weights/weights_best.h5
+best_model: ./logs/textboxes_myDataSet_v2/weights/weights_best.h5
 
 
 ##############
