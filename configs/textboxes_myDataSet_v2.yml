@@ -150,6 +150,7 @@ batch_size: 64
 epochs: 18
 phase1: 14
 phase2: 17
+steps_per_epoch: -1
 data_dir: ./logs/textboxes_myDataSet_v2/data
 weights_dir: ./logs/textboxes_myDataSet_v2/weights
 csv_path: ./logs/textboxes_myDataSet_v2/train.csv

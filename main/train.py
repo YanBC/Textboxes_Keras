@@ -40,6 +40,7 @@ if __name__ == '__main__':
     valset = os.path.join(dataDir, 'val.txt')
     phase1 = config['phase1']
     phase2 = config['phase2']
+    steps_per_epoch = config['steps_per_epoch']
 
     def lr_schedule(epoch):
         if epoch < phase1:
@@ -67,7 +68,7 @@ if __name__ == '__main__':
 
 
     # create callbacks
-    model_checkpoint = ModelCheckpoint(filepath=weightsDir+'/ssd300_pascal_07+12_epoch-{epoch:02d}_loss-{loss:.4f}_val_loss-{val_loss:.4f}.h5',
+    model_checkpoint = ModelCheckpoint(filepath=weightsDir+'/epoch-{epoch:02d}_loss-{loss:.4f}_val_loss-{val_loss:.4f}.h5',
                                        monitor='val_loss',
                                        verbose=1,
                                        save_best_only=True,
@@ -88,8 +89,16 @@ if __name__ == '__main__':
 
 
     # start training
-    history = model.fit_generator(generator=train_gen,
-                                  epochs=n_times,
-                                  callbacks=callbacks,
-                                  validation_data=val_gen,
-                                  use_multiprocessing=True)
+    if steps_per_epoch > 0:
+        history = model.fit_generator(generator=train_gen,
+                                      steps_per_epoch=steps_per_epoch,
+                                      epochs=n_times,
+                                      callbacks=callbacks,
+                                      validation_data=val_gen,
+                                      use_multiprocessing=True)
+    else:
+        history = model.fit_generator(generator=train_gen,
+                                      epochs=n_times,
+                                      callbacks=callbacks,
+                                      validation_data=val_gen,
+                                      use_multiprocessing=True)
