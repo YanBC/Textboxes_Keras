@@ -57,8 +57,9 @@ if __name__ == '__main__':
         model = multi_gpu_model(model, gpus=n_gpus)
 
     sgd = SGD(lr=0.001, momentum=0.9, decay=5e-4, nesterov=False, clipvalue=0.3)
-    loss_f = TextBoxes_Loss(neg_pos_ratio=neg_pos_ratio, alpha=alpha, n_neg_min=10)
-    model.compile(optimizer=sgd, loss=loss_f.compute_loss)
+    adam = Adam(lr=0.001, decay=5e-4)
+    loss_f = TextBoxes_Loss(neg_pos_ratio=neg_pos_ratio, alpha=alpha)
+    model.compile(optimizer=adam, loss=loss_f.compute_loss)
 
 
     # get data generator

@@ -113,21 +113,21 @@ class TextBoxes_Loss:
         # 2: Compute the classification losses for the positive and negative targets.
 
         # Create masks for the positive and negative ground truth classes.
-        negatives = y_true[:,:,0] # Tensor of shape (batch_size, n_boxes)
-        positives = tf.to_float(tf.reduce_max(y_true[:,:,1:-4], axis=-1)) # Tensor of shape (batch_size, n_boxes)
+        isNegatives = y_true[:,:,0] # Tensor of shape (batch_size, n_boxes)
+        isPositives = y_true[:,:,1] # Tensor of shape (batch_size, n_boxes)
 
         # Count the number of positive boxes (classes 1 to n) in y_true across the whole batch.
-        n_positive = tf.reduce_sum(positives)
+        n_positive = tf.reduce_sum(isPositives)
 
         # Now mask all negative boxes and sum up the losses for the positive boxes PER batch item
         # (Keras loss functions must output one scalar loss value PER batch item, rather than just
         # one scalar for the entire batch, that's why we're not summing across all axes).
-        pos_class_loss = tf.reduce_sum(classification_loss * positives, axis=-1) # Tensor of shape (batch_size,)
+        pos_class_loss = tf.reduce_sum(classification_loss * isPositives, axis=-1) # Tensor of shape (batch_size,)
 
         # Compute the classification loss for the negative default boxes (if there are any).
 
         # First, compute the classification loss for all negative boxes.
-        neg_class_loss_all = classification_loss * negatives # Tensor of shape (batch_size, n_boxes)
+        neg_class_loss_all = classification_loss * isNegatives # Tensor of shape (batch_size, n_boxes)
         n_neg_losses = tf.count_nonzero(neg_class_loss_all, dtype=tf.int32) # The number of non-zero loss entries in `neg_class_loss_all`
         # What's the point of `n_neg_losses`? For the next step, which will be to compute which negative boxes enter the classification
         # loss, we don't just want to know how many negative ground truth boxes there are, but for how many of those there actually is
@@ -174,7 +174,7 @@ class TextBoxes_Loss:
         # 3: Compute the localization loss for the positive targets.
         #    We don't compute a localization loss for negative predicted boxes (obviously: there are no ground truth boxes they would correspond to).
 
-        loc_loss = tf.reduce_sum(localization_loss * positives, axis=-1) # Tensor of shape (batch_size,)
+        loc_loss = tf.reduce_sum(localization_loss * isPositives, axis=-1) # Tensor of shape (batch_size,)
 
         # 4: Compute the total loss.
 
