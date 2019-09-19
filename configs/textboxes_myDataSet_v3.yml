@@ -1,0 +1,255 @@
+# textboxes_myDataSet_v3.yml
+
+############
+#  Common
+############
+
+img_height: 300
+img_width: 300
+img_channels: 3
+n_predictor_layers: 6   # same as len(config['layers'])
+layers:
+    - layer1
+    - layer2
+    - layer3
+    - layer4
+    - layer5
+    - layer6
+
+aspect_ratios:
+    layer1: 
+        - 1.0
+        - 2.0
+        - 3.0
+        - 5.0
+        - 7.0
+        - 10.0
+        - 1.0
+        - 2.0
+        - 3.0
+        - 5.0
+        - 7.0
+        - 10.0
+    layer2: 
+        - 1.0
+        - 2.0
+        - 3.0
+        - 5.0
+        - 7.0
+        - 10.0
+        - 1.0
+        - 2.0
+        - 3.0
+        - 5.0
+        - 7.0
+        - 10.0
+    layer3: 
+        - 1.0
+        - 2.0
+        - 3.0
+        - 5.0
+        - 7.0
+        - 10.0
+        - 1.0
+        - 2.0
+        - 3.0
+        - 5.0
+        - 7.0
+        - 10.0
+    layer4: 
+        - 1.0
+        - 2.0
+        - 3.0
+        - 5.0
+        - 7.0
+        - 10.0
+        - 1.0
+        - 2.0
+        - 3.0
+        - 5.0
+        - 7.0
+        - 10.0
+    layer5: 
+        - 1.0
+        - 2.0
+        - 3.0
+        - 5.0
+        - 7.0
+        - 10.0
+        - 1.0
+        - 2.0
+        - 3.0
+        - 5.0
+        - 7.0
+        - 10.0
+    layer6: 
+        - 1.0
+        - 2.0
+        - 3.0
+        - 5.0
+        - 7.0
+        - 10.0
+        - 1.0
+        - 2.0
+        - 3.0
+        - 5.0
+        - 7.0
+        - 10.0
+# This is the feature map corresponds to that built by
+# calling ./models/textboxes.py.
+nfeat:
+    layer1:
+        height: 38
+        width: 38
+    layer2:
+        height: 19
+        width: 19
+    layer3:
+        height: 10
+        width: 10
+    layer4:
+        height: 5
+        width: 5
+    layer5:
+        height: 3
+        width: 3
+    layer6:
+        height: 1
+        width: 1
+output_shape:
+    - 23280         # (38*38+19*19+10*10+5*5+3*3+1*1)*12
+    - 6
+
+############
+#  Model
+############
+n_classes: 2
+l2_reg: 0.0005
+# image mean provided by the original VGG model
+subtract_mean:
+    - 123
+    - 117
+    - 104
+divide_by_stddev:
+    - 1
+    - 1
+    - 1
+swap_channels:
+    - 2
+    - 1
+    - 0
+
+##############
+#   Train
+##############
+n_gpus: 1
+backbone: ./pretrain_weights/VGG_ILSVRC_16_layers_fc_reduced.h5
+loss_neg_pos_ratio: 3
+loss_alpha: 1.0
+batch_size: 32
+epochs: 20
+phase1: 15
+phase2: 19
+steps_per_epoch: 2000
+data_dir: ./logs/textboxes_myDataSet_v3/data
+weights_dir: ./logs/textboxes_myDataSet_v3/weights
+csv_path: ./logs/textboxes_myDataSet_v3/train.csv
+tbDir: ./logs/textboxes_myDataSet_v3/tblog/
+
+
+##############
+#  Predict
+##############
+best_model: ./logs/textboxes_myDataSet_v3/weights/weights_best.h5
+
+
+##############
+# Data Parser
+##############
+# vertical offset of anchor boxes
+# horrizontal offset is not specified here because it is assumed to be zero (i.e. located at the centre)
+# offsets should be of the same size of aspect_ratios
+offsets:
+    layer1:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0.5
+        - 0.5
+        - 0.5
+        - 0.5
+        - 0.5
+        - 0.5
+    layer2:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0.5
+        - 0.5
+        - 0.5
+        - 0.5
+        - 0.5
+        - 0.5
+    layer3:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0.5
+        - 0.5
+        - 0.5
+        - 0.5
+        - 0.5
+        - 0.5
+    layer4:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0.5
+        - 0.5
+        - 0.5
+        - 0.5
+        - 0.5
+        - 0.5
+    layer5:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0.5
+        - 0.5
+        - 0.5
+        - 0.5
+        - 0.5
+        - 0.5
+    layer6:
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0
+        - 0.5
+        - 0.5
+        - 0.5
+        - 0.5
+        - 0.5
+        - 0.5
+
+# predition parameters
+conf_thres: 0.7
+iou_thres: 0.45
+top_k: 200
