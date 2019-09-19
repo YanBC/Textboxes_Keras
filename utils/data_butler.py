@@ -65,7 +65,7 @@ class Data_Butler():
     def image_preprocessing(self, image):
         img = cv.resize(image, (self.img_w, self.img_h))
         img -= np.array(self.image_mean, dtype=np.uint8)
-        # img /= 255
+        img = img / 255
 
         return img
 

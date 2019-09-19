@@ -69,7 +69,7 @@ class TextBoxes_Loss:
         # Make sure that `y_pred` doesn't contain any zeros (which would break the log function)
         y_pred = tf.maximum(y_pred, 1e-15)
         # Compute the log loss
-        log_loss = -tf.reduce_sum(y_true * tf.log(y_pred), axis=-1)
+        log_loss = tf.reduce_sum(-1 * y_true * tf.log(y_pred), axis=-1)
         return log_loss
 
     def compute_loss(self, y_true, y_pred):
@@ -98,9 +98,9 @@ class TextBoxes_Loss:
         Returns:
             A scalar, the total multitask loss for classification and localization.
         '''
-        self.neg_pos_ratio = tf.constant(self.neg_pos_ratio)
-        self.n_neg_min = tf.constant(self.n_neg_min)
-        self.alpha = tf.constant(self.alpha)
+        neg_pos_ratio = tf.constant(self.neg_pos_ratio)
+        n_neg_min = tf.constant(self.n_neg_min)
+        alpha = tf.constant(self.alpha)
 
         batch_size = tf.shape(y_pred)[0] # Output dtype: tf.int32
         n_boxes = tf.shape(y_pred)[1] # Output dtype: tf.int32, note that `n_boxes` in this context denotes the total number of boxes per image, not the number of boxes per cell.
@@ -140,7 +140,7 @@ class TextBoxes_Loss:
 
         # Compute the number of negative examples we want to account for in the loss.
         # We'll keep at most `self.neg_pos_ratio` times the number of positives in `y_true`, but at least `self.n_neg_min` (unless `n_neg_loses` is smaller).
-        n_negative_keep = tf.minimum(tf.maximum(self.neg_pos_ratio * tf.to_int32(n_positive), self.n_neg_min), n_neg_losses)
+        n_negative_keep = tf.minimum(tf.maximum(neg_pos_ratio * tf.to_int32(n_positive), n_neg_min), n_neg_losses)
 
         # In the unlikely case when either (1) there are no negative ground truth boxes at all
         # or (2) the classification loss for all negative boxes is zero, return zero as the `neg_class_loss`.
@@ -178,7 +178,7 @@ class TextBoxes_Loss:
 
         # 4: Compute the total loss.
 
-        total_loss = (class_loss + self.alpha * loc_loss) / tf.maximum(1.0, n_positive) # In case `n_positive == 0`
+        total_loss = (class_loss + alpha * loc_loss) / tf.maximum(1.0, n_positive) # In case `n_positive == 0`
         # Keras has the annoying habit of dividing the loss by the batch size, which sucks in our case
         # because the relevant criterion to average our loss over is the number of positive boxes in the batch
         # (by which we're dividing in the line above), not the batch size. So in order to revert Keras' averaging
@@ -197,22 +197,29 @@ class TextBoxes_Loss:
 if __name__ == '__main__':
     import numpy as np
 
+    tf.enable_eager_execution()
+
     loss_f = TextBoxes_Loss(neg_pos_ratio=3, alpha=1.0, n_neg_min=10)
     y_true = np.random.rand(32, 23280, 6)
     y_true[:,:,0] = np.random.choice([0,1], 23280*32).reshape((32, 23280))
     y_true[:,:,1] = 1 - y_true[:,:,0]
-    y_pred = y_true
 
-    gt = tf.constant(y_true, dtype=tf.float32)
-    pred = tf.constant(y_pred, dtype=tf.float32)
+    y_pred = np.random.rand(32, 23280, 6)
+    y_pred[:,:,0] = np.random.choice([0,1], 23280*32).reshape((32, 23280))
+    y_pred[:,:,1] = 1 - y_pred[:,:,0]
 
-    loss = loss_f.compute_loss(gt, pred)
+    loss = loss_f.compute_loss(y_true, y_pred)
 
-    sess = tf.Session()
+    # gt = tf.constant(y_true, dtype=tf.float32)
+    # pred = tf.constant(y_pred, dtype=tf.float32)
 
-    tmp = sess.run(loss) / 32
+    # loss = loss_f.compute_loss(gt, pred)
 
-    a = 3
+    # sess = tf.Session()
+
+    # tmp = sess.run(loss) / 32
+
+    # a = 3
 
 
 
