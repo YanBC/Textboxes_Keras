@@ -9,7 +9,6 @@ from keras.models import load_model
 import sys
 sys.path.append(os.getcwd())
 from models.loss_function import TextBoxes_Loss
-from models.textboxes import textboxes, pixel
 from utils.data_butler import Data_Butler
 
 
