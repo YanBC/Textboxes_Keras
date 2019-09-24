@@ -2,14 +2,14 @@ import numpy as np
 import cv2 as cv
 
 class Data_Butler():
-    def __init__(self, img_height, img_width, layers, nfeat, offsets, aspect_ratios, subtract_mean):
+    def __init__(self, img_height, img_width, nfeat, offsets, aspect_ratios):
+        assert len(aspect_ratios) == len(offsets)
+
         self.img_h = img_height
         self.img_w = img_width
-        self.layernames = layers
+        self.aspect_ratios = aspect_ratios
         self.nfeat = nfeat
         self.offsets = offsets
-        self.aspect_ratios = aspect_ratios
-        self.image_mean = subtract_mean
 
 
     def _anchor_box_per_layer(self, feat_h, feat_w, aspect_ratios, v_offsets):
@@ -51,11 +51,13 @@ class Data_Butler():
 
     def _anchor_boxes(self):
         boxes_per_layer = []
-        for layer in self.layernames:
-            f_h = self.nfeat[layer]['height']
-            f_w = self.nfeat[layer]['width']
-            ars = self.aspect_ratios[layer]
-            offsets = self.offsets[layer]
+        n_featuremap = len(self.nfeat) // 2
+
+        for i in range(n_featuremap):
+            f_h = self.nfeat[i * 2]
+            f_w = self.nfeat[i * 2 + 1]
+            ars = self.aspect_ratios
+            offsets = self.offsets
             layer_boxes = self._anchor_box_per_layer(f_h, f_w, ars, offsets)
             boxes_per_layer.append(layer_boxes)
 
@@ -64,7 +66,6 @@ class Data_Butler():
 
     def image_preprocessing(self, image):
         img = cv.resize(image, (self.img_w, self.img_h))
-        img -= np.array(self.image_mean, dtype=np.uint8)
         img = img / 255
 
         return img
@@ -110,15 +111,6 @@ class Data_Butler():
         if len(gt_labels) > 0:
             # translate gt_labels to gt_boxes
             image_h, image_w, _ = image.shape
-            # gt_list = []
-            # for gt_label in gt_labels:
-            #     left, top, right, bottom = gt_label
-            #     cx = float(right + left) / 2 / image_w
-            #     cy = float(bottom + top) / 2 / image_h
-            #     w = float(right - left + 1) / 2 / image_w
-            #     h = float(bottom - top + 1) / 2 / image_h
-            #     gt_list.append(np.array([cx, cy, w, h]))
-            # gt_boxes = np.stack(gt_list)
             gt_list = []
             for gt_label in gt_labels:
                 cx, cy, width, height = gt_label
@@ -234,7 +226,20 @@ class Data_Butler():
         return text_boxes
 
 
+    def input_shape(self):
+        return (self.img_h, self.img_w, 3)
 
+
+    def output_shape(self):
+        n_featuremap = len(self.nfeat) // 2
+
+        n_cell = 0
+        for i in range(n_featuremap):
+            n_cell += self.nfeat[2 * i] * self.nfeat[2 * i + 1]
+
+        n_box_per_cell = len(self.aspect_ratios)
+
+        return (n_cell * n_box_per_cell, 6)
 
 
 
@@ -244,18 +249,16 @@ class Data_Butler():
 if __name__ == '__main__':
     import yaml
 
-    with open('./configs/textboxes_original.yml') as f:
+    with open('./configs/conv_model.yml') as f:
         config = yaml.safe_load(f.read())
     p = Data_Butler(config['img_height'], \
                   config['img_width'], \
-                  config['layers'], \
                   config['nfeat'], \
                   config['offsets'], \
-                  config['aspect_ratios'], \
-                  config['subtract_mean'])
+                  config['aspect_ratios'])
 
-    imagePath = './tmp_data/image/11.jpg'
-    annoPath = './tmp_data/label/11.txt'
+    imagePath = './detect_for_textboxes_test/image/0.jpg'
+    annoPath = './detect_for_textboxes_test/label/0.txt'
     image = cv.imread(imagePath)
     annos = []
     with open(annoPath) as f:
@@ -268,55 +271,31 @@ if __name__ == '__main__':
 
             cx = float(right + left) / 2
             cy = float(bottom + top) / 2
-            width = float(right - left + 1) / 2
-            height = float(bottom - top + 1) / 2
+            width = float(right - left + 1)
+            height = float(bottom - top + 1)
 
             annos.append([cx, cy, width, height])
 
+    # check if annos_prime is the same as annos
     x, y_true = p.encode(image, annos)
 
     image_height, image_width, _ = image.shape
     annos_prime = p.decode(y_true, image_width=image_width, image_height=image_height)
 
-    a = 3
+
+    # check by drawing annos
+    text_boxes = []
+    for i in range(len(annos_prime)):
+        cx, cy, w, h = annos_prime[i, 1::]
+        left = int(cx - w / 2)
+        right = int(cx + w /2)
+        top = int(cy - h /2)
+        bottom = int(cy + h / 2)
+
+        cv.rectangle(image, (int(left), int(top)), (int(right), int(bottom)), (0, 255, 0), 1)
+
+    cv.namedWindow('show', cv.WINDOW_NORMAL)
+    cv.imshow('show', image)
+    cv.waitKey()
 
 
-
-
-
-
-
-
-
-# # Parser._anchor_boxes test
-# if __name__ == '__main__':
-#     import yaml
-
-#     with open('./configs/textboxes_original.yml') as f:
-#         config = yaml.safe_load(f.read())
-
-#     encoder = Parser(config)
-
-#     boxes = encoder._anchor_boxes()
-
-#     a = 3
-
-
-# # Parser._anchor_box_per_layer test
-# if __name__ == '__main__':
-#     import yaml
-
-#     with open('./configs/textboxes_original.yml') as f:
-#         config = yaml.safe_load(f.read())
-
-#     encoder = Parser(config)
-
-#     target_layer = 'layer5'
-#     f_h = encoder.nfeat[target_layer]['height']
-#     f_w = encoder.nfeat[target_layer]['width']
-#     ars = encoder.aspect_ratios[target_layer]
-#     o_s = encoder.offsets[target_layer]
-
-#     boxes = encoder._anchor_box_per_layer(f_h, f_w, ars, o_s)
-
-#     a = 3

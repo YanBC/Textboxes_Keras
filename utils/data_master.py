@@ -14,27 +14,15 @@ class Data_Master(Sequence):
     my data generator class for keypoint detection; 
     see keras.utils.Sequence definition (https://github.com/keras-team/keras/blob/master/keras/utils/data_utils.py#L305) for more detials 
     """
-    def __init__(self, config, dataset, shuffle=True):
-        # self.img_h = config['img_height']
-        # self.img_w = config['img_width']
-        # self.layernames = config['layers']
-        # self.nfeat = config['nfeat']
-        # self.offsets = config['offsets']
-        # self.aspect_ratios = config['aspect_ratios']
-        # self.image_mean = config['subtract_mean']
+    def __init__(self, dataset, batch_size, img_h, img_w, nfeat, offsets, aspect_ratios, shuffle=True):
 
-        self.Alfred = Data_Butler(config['img_height'], \
-                                  config['img_width'], \
-                                  config['layers'], \
-                                  config['nfeat'], \
-                                  config['offsets'], \
-                                  config['aspect_ratios'], \
-                                  config['subtract_mean'])
-        self.image_height = config['img_height']
-        self.image_width = config['img_width']
-        self.batch_size = config['batch_size']
-        self.output_shape = config['output_shape']
+        self.Alfred = Data_Butler(img_h, img_w, nfeat, offsets, aspect_ratios)
+        self.output_shape = self.Alfred.output_shape()
 
+        self.batch_size = batch_size
+        self.image_height = img_h
+        self.image_width = img_w
+        
         self.shuffle = shuffle
         self.annoRecord = dict()
         with open(dataset) as f:
@@ -77,8 +65,8 @@ class Data_Master(Sequence):
 
                     cx = float(right + left) / 2
                     cy = float(bottom + top) / 2
-                    width = float(right - left + 1) / 2
-                    height = float(bottom - top + 1) / 2
+                    width = float(right - left + 1)
+                    height = float(bottom - top + 1)
                     annos.append([cx, cy, width, height])            
 
             input_v[i,:], output_v[i,:] = self.Alfred.encode(image, annos)
@@ -97,11 +85,11 @@ class Data_Master(Sequence):
 if __name__ == '__main__':
     import yaml
 
-    with open('./configs/textboxes_original.yml') as f:
+    with open('./configs/conv_model.yml') as f:
         config = yaml.safe_load(f.read())
 
-    dataset = './logs/original/train.txt'
-    p = Data_Master(config, dataset)
+    dataset = './train.txt'
+    p = Data_Master(dataset, 1, config['img_height'], config['img_width'], config['nfeat'], config['offsets'], config['aspect_ratios'])
 
     print(p.images)
     for i in range(len(p)):

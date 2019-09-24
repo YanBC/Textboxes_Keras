@@ -7,7 +7,6 @@
 img_height: 300
 img_width: 300
 img_channels: 3
-n_predictor_layers: 6   # same as len(config['layers'])
 layers:
     - layer1
     - layer2
@@ -124,7 +123,7 @@ output_shape:
 #  Model
 ############
 n_classes: 2
-l2_reg: 0.0005
+l2_reg: 0.0
 # image mean provided by the original VGG model
 subtract_mean:
     - 123
@@ -160,7 +159,7 @@ tbDir: ./logs/textboxes_test/tblog/
 ##############
 #  Predict
 ##############
-best_model: ./logs/textboxes_test/weights/weights_best.h5
+best_model: ./logs/textboxes_test/weights/dummy.h5
 
 
 ##############
