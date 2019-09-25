@@ -9,6 +9,7 @@ from keras.models import load_model
 import sys
 sys.path.append(os.getcwd())
 from models.loss_function import TextBoxes_Loss
+from models.densenet_model import densenet_model as get_model
 from utils.data_butler import Data_Butler
 
 
@@ -22,7 +23,7 @@ class Detector():
         self.iou_thres = iou_thres
         self.conf_thres = conf_thres
 
-        loss_f = TextBoxes_Loss(neg_pos_ratio=neg_pos_ratio, alpha=alpha, n_neg_min=10)
+        loss_f = TextBoxes_Loss(neg_pos_ratio=neg_pos_ratio, alpha=alpha)
 
         # create model
         if n_gpus > 1:
@@ -33,7 +34,7 @@ class Detector():
             os.mkdir(tmpDir)
             model.save_weights(weightPath)
 
-            self.model = TextBoxes(config)
+            self.model = get_model(self.img_height, self.img_width)
             parallel_model = multi_gpu_model(self.model, gpus=n_gpus)
             parallel_model.load_weights(weightPath, by_name=True)
 
