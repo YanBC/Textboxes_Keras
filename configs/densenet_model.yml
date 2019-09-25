@@ -20,10 +20,13 @@ n_gpus: 1
 loss_neg_pos_ratio: 1
 loss_alpha: 1.0
 batch_size: 8
-epochs: 600
-phase1: 300
-phase2: 500
+
+epochs: 200
+phase1: 130
+phase2: 180
 steps_per_epoch: 1000
+initial_epoch: 96
+
 data_dir: ./logs/densenet_model/data
 weights_dir: ./logs/densenet_model/weights
 csv_path: ./logs/densenet_model/train.csv

@@ -5,6 +5,7 @@ sys.path.append(os.getcwd())
 import yaml
 import argparse
 import cv2 as cv
+import keras
 from keras.optimizers import Adam, SGD
 from keras.callbacks import ModelCheckpoint, LearningRateScheduler, TerminateOnNaN, CSVLogger, TensorBoard
 from keras import backend as K
@@ -55,6 +56,7 @@ if __name__ == '__main__':
     phase1 = config['phase1']
     phase2 = config['phase2']
     steps_per_epoch = config['steps_per_epoch']
+    initial_epoch = config['initial_epoch']
     best_model = config['best_model']
 
 
@@ -71,7 +73,32 @@ if __name__ == '__main__':
     adam = Adam(lr=0.001, decay=5e-4)
     loss_f = TextBoxes_Loss(neg_pos_ratio=neg_pos_ratio, alpha=alpha)
 
-    model = get_model(image_h, image_w)
+    if os.path.isfile(best_model):
+        model = load_model(best_model, custom_objects={'compute_loss': loss_f.compute_loss})
+
+        # try to determine the number of gpu used
+        # and convert it to one-gpu model
+        if isinstance(model.layers[1], keras.layers.Lambda):
+            try:
+                old_n_gpus = model.layers[1].arguments['parts']
+
+                tmpDir = './_____tmp'
+                weightPath = os.path.join(tmpDir, 'tmp_weights')
+                # assert not os.path.isdir(tmpDir)
+                os.mkdir(tmpDir)
+                model.save_weights(weightPath)
+
+                self.model = TextBoxes(config)
+                parallel_model = multi_gpu_model(self.model, gpus=old_n_gpus)
+                parallel_model.load_weights(weightPath, by_name=True)
+
+                shutil.rmtree(tmpDir)
+                del parallel_model
+            except:
+                pass
+    else:
+        model = get_model(image_h, image_w)
+
     if n_gpus > 1:
         model = multi_gpu_model(model, gpus=n_gpus)
 
@@ -93,7 +120,7 @@ if __name__ == '__main__':
 
 
     # create callbacks
-    model_checkpoint = ModelCheckpoint(filepath=weightsDir+'/epoch-{epoch:02d}_loss-{loss:.4f}_val_loss-{val_loss:.4f}.h5', monitor='val_loss', verbose=1, save_best_only=True, save_weights_only=False, mode='auto', period=1)
+    model_checkpoint = ModelCheckpoint(filepath=weightsDir+'/epoch-{epoch:02d}_loss-{loss:.4f}_val_loss-{val_loss:.4f}.h5', monitor='val_loss', verbose=1, save_best_only=False, save_weights_only=False, mode='auto', period=1)
     csv_logger = CSVLogger(filename=csvPath,
                            separator=',',
                            append=True)
@@ -110,10 +137,12 @@ if __name__ == '__main__':
                                       epochs=n_times,
                                       callbacks=callbacks,
                                       validation_data=val_gen,
-                                      use_multiprocessing=True)
+                                      use_multiprocessing=True,
+                                      initial_epoch=initial_epoch)
     else:
         history = model.fit_generator(generator=train_gen,
                                       epochs=n_times,
                                       callbacks=callbacks,
                                       validation_data=val_gen,
-                                      use_multiprocessing=True)
+                                      use_multiprocessing=True,
+                                      initial_epoch=initial_epoch)
