@@ -66,6 +66,6 @@ offsets:
     - 0.5
 
 # predition parameters
-conf_thres: 0.7
+conf_thres: 0.2
 iou_thres: 0.45
 top_k: 200
