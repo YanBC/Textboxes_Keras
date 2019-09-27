@@ -148,7 +148,7 @@ class Data_Butler():
                             cross = np.where(match[:this] == match[this])[0]
 
             # y_true
-            # backup will be labeled 0, while text labeled 1
+            # background will be labeled 0, while text labeled 1
             y_true = np.zeros(shape=(len(anchor_boxes), 6))
             y_true[:, 0] = 1
             y_true[:, 2:] = anchor_boxes

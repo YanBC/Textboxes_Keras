@@ -55,7 +55,6 @@ if __name__ == '__main__':
 
     d = Detector(modelPath, img_height, img_width, top_k, iou_thres, conf_thres, nfeat, offsets, aspect_ratios, n_gpus, neg_pos_ratio, alpha)
 
-
     # processing
     if os.path.isfile(args.src):
         srcFile = args.src
@@ -116,6 +115,7 @@ if __name__ == '__main__':
 
         for imageName in imageNames:
             imagePath = os.path.join(args.src, imageName)
+            print('Processing {}'.format(imagePath))
 
             image = cv.imread(imagePath)
             boxes = d.predict(image)
@@ -129,6 +129,8 @@ if __name__ == '__main__':
                 cv.rectangle(show, (int(left), int(top)), (int(right), int(bottom)), (0, 255, 0), 2)
 
             if args.des:
+                if not os.path.isdir(args.des):
+                    os.mkdir(args.des)
                 cv.imwrite(os.path.join(args.des, imageName), show)
             if args.show:
                 cv.namedWindow(imagePath, cv.WINDOW_NORMAL)
