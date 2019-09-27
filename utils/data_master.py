@@ -70,7 +70,7 @@ class Data_Master(Sequence):
                     annos.append([cx, cy, width, height])            
 
             input_v[i,:], output_v[i,:] = self.Alfred.encode(image, annos)
-            return input_v, output_v
+        return input_v, output_v
 
 
     def __getitem__(self, index):
@@ -85,14 +85,12 @@ class Data_Master(Sequence):
 if __name__ == '__main__':
     import yaml
 
-    with open('./configs/conv_model.yml') as f:
+    with open('./configs/densenet_model.yml') as f:
         config = yaml.safe_load(f.read())
 
-    dataset = './train.txt'
-    p = Data_Master(dataset, 1, config['img_height'], config['img_width'], config['nfeat'], config['offsets'], config['aspect_ratios'])
+    # dataset = './train.txt'
+    dataset = os.path.join(config['data_dir'], 'train.txt')
+    p = Data_Master(dataset, 128, config['img_height'], config['img_width'], config['nfeat'], config['offsets'], config['aspect_ratios'])
 
-    print(p.images)
-    for i in range(len(p)):
-        print(i)
-        tmp, tmp1 = p[i]
+    x, y_true = p[0]
 
