@@ -13,7 +13,7 @@ from keras.layers import TimeDistributed
 def conv_block(input_t, growth_rate, dropout_rate=None, weight_decay=1e-4):
     x = BatchNormalization(axis=-1, epsilon=1.1e-5)(input_t)
     x = Activation('relu')(x)
-    x = Conv2D(growth_rate, (3,3), kernel_initializer='he_normal', padding='same')(x)
+    x = Conv2D(growth_rate, (3,3), kernel_initializer='he_normal', padding='same', kernel_regularizer=l2(weight_decay))(x)
     if(dropout_rate):
         x = Dropout(dropout_rate)(x)
     return x
@@ -49,7 +49,8 @@ def transition_block(input_t, nb_filter, dropout_rate=None, weight_decay=1e-4):
 
 def densenet_model(img_h, img_w):
     _dropout_rate=0.2
-    _weight_decay=1e-4
+    # _weight_decay=1e-4
+    _weight_decay = 0.0005
     _nb_filter=64
 
     input_t = Input(shape=(img_h, img_w, 3))
