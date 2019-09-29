@@ -17,13 +17,7 @@ from utils.data_master import Data_Master as data_gen
 # from models.textboxes import textboxes, pixel
 # from models.keras_layer_L2Normalization import L2Normalization
 
-##########################################################################
-# from models.conv_model import conv_model as get_model
-from models.densenet_model import densenet_model as get_model
-##########################################################################
-
-
-
+from main_config import get_model
 
 
 if __name__ == '__main__':

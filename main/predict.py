@@ -9,8 +9,9 @@ from keras.models import load_model
 import sys
 sys.path.append(os.getcwd())
 from models.loss_function import TextBoxes_Loss
-from models.densenet_model import densenet_model as get_model
 from utils.data_butler import Data_Butler
+
+from main_config import get_model
 
 
 class Detector():
