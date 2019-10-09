@@ -17,7 +17,8 @@ offsets = [0, 0, 0, 0.5, 0.5, 0.5]
 aspect_ratios = [3.0, 5.0, 7.0, 3.0, 5.0, 7.0]
 dirName = 'faster_training'
 
-srcDir = '../make_dataset/generated/detect_for_textboxes_60000/'
+# srcDir = '../make_dataset/generated/detect_for_textboxes_60000/'
+srcDir = './samples/real_samples/images/'
 ####### Config ##########
 
 imageDir = os.path.join(srcDir, 'image')

@@ -1,0 +1,71 @@
+# separable_densenet_model_improved.yml
+
+############
+#  Common
+############
+
+img_height: 512
+img_width: 512
+
+
+############
+#  Model
+############
+l2_reg: 0.0         # change this to 0.0005 when training
+
+##############
+#   Train
+##############
+n_gpus: 1
+loss_neg_pos_ratio: 1
+loss_alpha: 1.0
+batch_size: 6
+
+epochs: 60
+phase1: 30
+phase2: 50
+steps_per_epoch: -1
+initial_epoch: 0
+
+data_dir: ./logs/separable_densenet_model_improved/data
+weights_dir: ./logs/separable_densenet_model_improved/weights
+csv_path: ./logs/separable_densenet_model_improved/train.csv
+tbDir: ./logs/separable_densenet_model_improved/tblog/
+
+
+##############
+#  Predict
+##############
+best_model: ./logs/separable_densenet_model/weights/weights_best.h5
+
+
+##############
+# Data Parser
+##############
+aspect_ratios:
+    - 3.0
+    - 5.0
+    - 7.0
+    - 3.0
+    - 5.0
+    - 7.0
+nfeat:
+    - 32
+    - 32
+    - 16
+    - 16
+# vertical offset of anchor boxes
+# horrizontal offset is not specified here because it is assumed to be zero (i.e. located at the centre)
+# offsets should be of the same size of aspect_ratios
+offsets:
+    - 0
+    - 0
+    - 0
+    - 0.5
+    - 0.5
+    - 0.5
+
+# predition parameters
+conf_thres: 0.2
+iou_thres: 0.45
+top_k: 200
